@@ -1,0 +1,90 @@
+// Effect Syntax Guide: https://github.com/cocos-creator/docs-3d/blob/master/zh/material-system/effect-syntax.md
+
+CCEffect %{
+  techniques:
+  - name: opaque
+    passes:
+    - vert: general-vs:vert # builtin header
+      frag: unlit-fs:frag
+      properties: &props
+        size:           { value: [500.0, 500.0] }
+  - name: transparent
+    passes:
+    - vert: general-vs:vert # builtin header
+      frag: unlit-fs:frag
+      blendState:
+        targets:
+        - blend: true
+          blendSrc: src_alpha
+          blendDst: one_minus_src_alpha
+          blendSrcAlpha: src_alpha
+          blendDstAlpha: one_minus_src_alpha
+      properties: *props
+}%
+
+
+CCProgram unlit-vs %{  
+  precision highp float;
+  #include <input-standard>
+  #include <cc-global>
+  #include <cc-local-batch>
+  #include <input-standard>
+
+  out vec4 v_screenPos;
+  out vec4 v_bufferParams;
+
+  vec4 vert () {
+    StandardVertInput In;
+    CCVertInput(In);
+    // initialized In.position
+
+    mat4 matWorld, matWorldIT;
+    CCGetWorldMatrixFull(matWorld, matWorldIT);
+
+    float near = cc_nearFar.x;
+    float far = cc_nearFar.y;
+    float zc0 = (near - far)/(near);
+    float zc1 = far/near;
+    v_bufferParams = vec4(zc0, zc1, zc0/far, zc1/far);
+
+    v_screenPos = cc_matProj * (cc_matView * matWorld) * In.position;
+    return v_screenPos;
+  }
+}%
+
+CCProgram unlit-fs %{
+  precision highp float;
+  #include <output>
+  #include <cc-fog-fs>
+  #include <cc-sprite-texture>
+  
+  in vec2 v_uv;
+  in vec3 v_position;
+
+  uniform Constant {
+    vec2 size;
+  };
+
+  const float RADIUS = 20.0;
+
+  vec4 getBlurColor (vec2 pos) {
+    vec4 color = vec4(0);
+    float sum = 0.0;
+    for (float r = -RADIUS; r <= RADIUS; r++) {
+      for (float c = -RADIUS; c <= RADIUS; c++) {
+        vec2 target = pos + vec2(r / size.x, c / size.y);
+        float weight = (RADIUS - abs(r)) * (RADIUS - abs(c));
+        color += texture(cc_spriteTexture, target) * weight;
+        sum += weight;
+      }
+    }
+    color /= sum;
+    return color;
+  }
+
+  vec4 frag () {
+    vec4 col = getBlurColor(v_uv);
+    CC_APPLY_FOG(col, v_position);
+    return CCFragOutput(col);
+  }
+}%
