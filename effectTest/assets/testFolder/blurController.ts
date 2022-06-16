@@ -23,13 +23,59 @@ export class blurController extends Component {
     // @property
     // serializableDummy = 0;
 
+
+    @property({type: Node})
+    public unblurCamera: Node | null = null;
+
+    @property({type: Node})
+    public renderCamera: Node | null = null;
+
+    @property({type: Node})
+    public renderedSprite: Node | null = null;
+
+    @property({type: Node})
+    public magic: Node | null = null;
+
     start () {
         // [3]
     }
 
-    // update (deltaTime: number) {
-    //     // [4]
-    // }
+    /**
+     * blur
+     */
+    public blur() {
+        this.unblurCamera.active = false;
+        this.renderCamera.active = true;
+        this.renderedSprite.active = true;
+        this.magic.active = true;
+    }
+
+    /**
+     * unblur
+     */
+    public unblur() {
+        this.unblurCamera.active = true;
+        this.renderCamera.active = false;
+        this.renderedSprite.active = false;
+        this.magic.active = false;
+    }
+
+    private isBlur: boolean = true;
+    /**
+     * switch
+     */
+    public switch() {
+        this.isBlur = !this.isBlur;
+    }
+
+    update (deltaTime: number) {
+        if (this.isBlur) {
+            this.blur();
+        }
+        else {
+            this.unblur();
+        }
+    }
 }
 
 /**

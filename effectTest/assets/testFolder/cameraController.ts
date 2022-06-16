@@ -1,5 +1,5 @@
 
-import { _decorator, Component, Node } from 'cc';
+import { _decorator, Component, Node, Vec3, tween } from 'cc';
 const { ccclass, property } = _decorator;
 
 /**
@@ -22,14 +22,42 @@ export class cameraController extends Component {
     // [2]
     // @property
     // serializableDummy = 0;
+    @property({type: Node})
+    public unblurCamera: Node | null = null;
 
+    @property({type: Node})
+    public renderCamera: Node | null = null;
     start () {
         // [3]
+        // tween(this.unblurCamera)
+        // .to(3, { position: new Vec3(10, 10, 10) }, { easing: 'bounceInOut' })
+        // .to(3, { position: new Vec3(0, 0, 0) }, { easing: 'elasticOut' })
+        // .union()
+        // .repeat(1) // 执行 2 次
+        // .start();
+        // tween(this.renderCamera)
+        // .to(3, { position: new Vec3(10, 10, 10) }, { easing: 'bounceInOut' })
+        // .to(3, { position: new Vec3(0, 0, 0) }, { easing: 'elasticOut' })
+        // .union()
+        // .repeat(1) // 执行 2 次
+        // .start();
+        
+        // this.renderCamera.translate(new Vec3(0, 1, 0));
+        // this.unblurCamera.translate(new Vec3(0, 1, 0));
     }
 
-    // update (deltaTime: number) {
-    //     // [4]
-    // }
+    // private initPos: Vec3 = new Vec3(-2.6, 3.5, 7);
+    private initPos: Vec3 = new Vec3(0, 0, 0);
+
+    update (deltaTime: number) {
+        // [4]
+        // this.renderCamera.translate(new Vec3(2, 4, 2));
+        // this.unblurCamera.translate(new Vec3(2, 4, 2));
+        
+
+        // this.renderCamera.setPosition(new Vec3(this.initPos[0] + Math.sin(deltaTime), this.initPos[0], this.initPos[0] + Math.sin(deltaTime)));
+        // this.unblurCamera.setPosition(new Vec3(this.initPos[0] + Math.sin(deltaTime), this.initPos[0], this.initPos[0] + Math.sin(deltaTime)));
+    }
 }
 
 /**
